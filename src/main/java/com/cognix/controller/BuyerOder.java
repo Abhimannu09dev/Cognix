@@ -1,41 +1,84 @@
 package com.cognix.controller;
 
+import com.cognix.DAO.CartDAO;
+import com.cognix.model.Model;
+import com.cognix.model.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.*;
 import java.io.IOException;
+import java.sql.SQLException;
+import java.util.List;
 
-/**
- * Servlet implementation class BuyerOder
- */
-@WebServlet("/BuyerOder")
+@WebServlet({"/BuyerOrder","/BuyerOder","/removeFromCart","/checkout"})
 public class BuyerOder extends HttpServlet {
-	private static final long serialVersionUID = 1L;
-       
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
-    public BuyerOder() {
-        super();
-        // TODO Auto-generated constructor stub
+    private static final long serialVersionUID = 1L;
+    private final CartDAO cartDao = new CartDAO();
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        loadCartPage(req, resp);
     }
 
-	/**
-	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
-	 */
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-    	request.getRequestDispatcher("/WEB-INF/pages/Buyer/BuyerOrder.jsp")
-        .forward(request, response);
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        String path = req.getServletPath();
+        HttpSession session = req.getSession(false);
+        User loggedIn = session != null ? (User) session.getAttribute("user") : null;
+        if (loggedIn == null) {
+            resp.sendRedirect(req.getContextPath() + "/Login");
+            return;
+        }
+        int buyerUserId = loggedIn.getId();
+
+        try {
+            if ("/removeFromCart".equals(path)) {
+                int modelId = Integer.parseInt(req.getParameter("modelId"));
+                cartDao.removeFromCart(buyerUserId, modelId);
+                resp.sendRedirect(req.getContextPath() + "/BuyerOrder");
+                return;
+
+            } else if ("/checkout".equals(path)) {
+                cartDao.checkout(buyerUserId);
+                // redirect with success flag
+                resp.sendRedirect(req.getContextPath() + "/BuyerOrder?checkoutSuccess=true");
+                return;
+            }
+        } catch (SQLException e) {
+            throw new ServletException("Cart operation failed", e);
+        }
+
+        resp.sendRedirect(req.getContextPath() + "/BuyerOrder");
     }
 
-	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
-	 */
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		doGet(request, response);
-	}
+    private void loadCartPage(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        HttpSession session = req.getSession(false);
+        User loggedIn = session != null ? (User) session.getAttribute("user") : null;
+        if (loggedIn == null) {
+            resp.sendRedirect(req.getContextPath() + "/Login");
+            return;
+        }
+        int buyerUserId = loggedIn.getId();
 
+        try {
+            List<Model> cartList = cartDao.findCartItems(buyerUserId);
+            int totalItems = cartList.size();
+            double totalPrice = cartList.stream()
+                                        .mapToDouble(Model::getPrice)
+                                        .sum();
+
+            req.setAttribute("cartList", cartList);
+            req.setAttribute("totalItems", totalItems);
+            req.setAttribute("totalPrice", totalPrice);
+
+        } catch (SQLException e) {
+            throw new ServletException("Failed to load cart", e);
+        }
+
+        req.getRequestDispatcher("/WEB-INF/pages/Buyer/BuyerOrder.jsp")
+           .forward(req, resp);
+    }
 }
