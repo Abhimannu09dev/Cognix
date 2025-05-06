@@ -18,6 +18,7 @@
     .sidebar__header img { max-width: 100%; height: auto; margin-bottom: 2rem; }
     .sidebar__nav { list-style: none; padding: 0; margin: 0; flex-grow: 1;
                      display: flex; flex-direction: column; gap: .5rem; }
+
     .sidebar__nav-item {
       display: flex; align-items: center; gap: .5rem;
       padding: .75rem 2.25rem .75rem .875rem;
@@ -34,6 +35,7 @@
       background: #fff; color: #111; font-weight: 600;
       border-left: 4px solid #111; padding-left: .5rem;
     }
+
     .sidebar__profile {
       display: flex; align-items: center; gap: .5rem;
       padding: .75rem 1rem; background: #fff; border-radius: .75rem;
@@ -47,6 +49,7 @@
     .sidebar__profile img.settings {
       margin-left: auto; width: 1.75rem; height: 1.75rem;
     }
+
     .modal { position: fixed; top:0; left:0; width:100%; height:100%;
              background: rgba(0,0,0,0.5); display: none;
              justify-content: center; align-items: center; z-index:1000; }
@@ -88,7 +91,7 @@
           </a>
         </li>
         <li class="sidebar__nav-item ${param.currentPage=='models'?'active':''}">
-          <a href="${pageContext.request.contextPath}/Model?currentPage=models">
+          <a href="${pageContext.request.contextPath}/Models?currentPage=models">
             <img src="${pageContext.request.contextPath}/nav-icons/Folder.svg" alt="Models" />
             <span>Model Management</span>
           </a>
@@ -99,13 +102,21 @@
             <span>Reports</span>
           </a>
         </li>
+
+        <!-- —— New Contact / Messages Link —— -->
+        <li class="sidebar__nav-item ${param.currentPage=='contact'?'active':''}">
+          <a href="${pageContext.request.contextPath}/AdminMessages?currentPage=contact">
+            <img src="${pageContext.request.contextPath}/nav-icons/message.svg" alt="Messages" />
+            <span>Contact</span>
+          </a>
+        </li>
+
       </ul>
     </div>
 
     <div class="sidebar__profile" id="profileToggle">
       <div class="profile-info">
-        <!-- ALWAYS pull from sessionScope.user -->
-         <img src="${pageContext.request.contextPath}/${sessionScope.user.profilePicture}" alt="Admin Avatar"/>
+        <img src="${pageContext.request.contextPath}/${sessionScope.user.profilePicture}" alt="Admin Avatar"/>
         <div style="display:flex;flex-direction:column;">
           <span class="name">${sessionScope.user.name}</span>
           <span class="role">Admin</span>
@@ -124,7 +135,10 @@
       <a href="${pageContext.request.contextPath}/Profile?currentPage=profile"
          class="btn btn-update">Update Profile</a>
       <a href="${pageContext.request.contextPath}/logout"
-         class="btn btn-logout" style="background-color:#fff;color:red;border-color:red;">Logout</a>
+         class="btn btn-logout"
+         style="background-color:#fff;color:red;border-color:red;">
+        Logout
+      </a>
     </div>
   </div>
 

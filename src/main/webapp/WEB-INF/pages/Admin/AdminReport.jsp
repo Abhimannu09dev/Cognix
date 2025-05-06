@@ -18,35 +18,69 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
+    :root {
+      --bg-offwhite: #F1EDE9;
+      --bg-white:    #fff;
+      --radius-lg:   24px;
+      --radius-sm:   8px;
+      --shadow-md:   0 2px 8px rgba(0,0,0,0.05);
+      --shadow-sm:   0 1px 4px rgba(0,0,0,0.05);
+      --font:        'Helvetica Neue', sans-serif;
+      --text:        #222;
+      --muted:       #666;
+      --accent:      #111;
+    }
+
     /* === Reset & Base === */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'Helvetica Neue', sans-serif;
-      background: #F1EDE9;
-      color: #222;
+      font-family: var(--font);
+      background: var(--bg-offwhite);
+      color: var(--text);
     }
+    a { text-decoration: none; color: inherit; }
 
     /* === Dashboard Container === */
     .dashboard {
-      display: flex;
-      max-width: 1440px;
-      margin: 0 auto;
-      min-height: 100vh;
-    }
-    .dashboard__nav {
-      width: 240px;
-    }
-    .dashboard__main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
+	  display: flex;
+	  max-width: 1440px;
+	  margin: 0 auto;
+	  /* fill the viewport and hide the native page scroll */
+	  height: 100vh;
+	  overflow: hidden;
+	}
+	
+	.dashboard__nav {
+	  width: 240px;
+	
+	  /* stick it to the top and make it scrollable if it's too tall */
+	  position: sticky;
+	  top: 0;
+	  height: 100vh;
+	  overflow-y: auto;
+	}
+	
+	.dashboard__main {
+	  flex: 1;
+	
+	  /* only this pane scrolls vertically */
+	  overflow-y: auto;
+	  scrollbar-width: none;       /* firefox */
+	  -ms-overflow-style: none;    /* ie10+ */
+	
+	  /* if you want to hide the webkit scrollbar */
+	}
+	.dashboard__main::-webkit-scrollbar {
+	  display: none;
+	}
+    
     .dashboard__header {
       padding: 2rem 3rem 0;
     }
     .dashboard__header h1 {
       font-size: 1.875rem;
-      margin-bottom: 1.5rem;
+      color: var(--accent);
+      margin-bottom: .5rem;
     }
     .dashboard__content {
       flex: 1;
@@ -67,12 +101,12 @@
     }
     .controls__filter {
       position: relative;
-      background: #fafafa;
+      background: var(--bg-white);
       border: 1px solid #ddd;
-      border-radius: 8px;
+      border-radius: var(--radius-sm);
       transition: background 0.2s;
     }
-    .controls__filter:hover { background: #f0f0f0; }
+    .controls__filter:hover { background: #f9f9f9; }
     .controls__filter select,
     .controls__filter input[type="date"] {
       appearance: none;
@@ -84,10 +118,7 @@
       cursor: pointer;
       min-width: 140px;
     }
-    .controls__filter select:focus,
-    .controls__filter input[type="date"]:focus {
-      outline: none;
-    }
+    .controls__filter:focus-within { box-shadow: 0 0 0 2px rgba(0,0,0,0.05); }
     /* chevron for selects */
     .controls__filter:not(.date-filter)::after {
       content: "\f078";
@@ -98,7 +129,7 @@
       top: 50%;
       transform: translateY(-50%);
       pointer-events: none;
-      color: #666;
+      color: var(--muted);
       font-size: .8rem;
     }
     /* calendar icon for date inputs */
@@ -111,16 +142,15 @@
       top: 50%;
       transform: translateY(-50%);
       pointer-events: none;
-      color: #666;
+      color: var(--muted);
       font-size: .8rem;
     }
-
     .controls__apply-btn {
       margin-left: auto;
-      background: #111;
-      color: #fff;
+      background: var(--accent);
+      color: var(--bg-white);
       border: none;
-      border-radius: 8px;
+      border-radius: var(--radius-sm);
       padding: .5rem 1rem;
       font-size: .95rem;
       cursor: pointer;
@@ -131,15 +161,15 @@
 
     /* === Report Sections === */
     .report-section {
-      background: #fff;
-      border-radius: 16px;
+      background: var(--bg-white);
+      border-radius: var(--radius-lg);
       padding: 1.5rem;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      box-shadow: var(--shadow-md);
     }
     .report-section h2 {
       font-size: 1.25rem;
       margin-bottom: .75rem;
-      color: #222;
+      color: var(--accent);
     }
     .report-section hr {
       border: none;
@@ -157,6 +187,14 @@
     .chart-container canvas {
       width: 100% !important;
       height: auto !important;
+    }
+
+    @media (max-width: 768px) {
+      .dashboard { flex-direction: column; padding: 1rem; }
+      .dashboard__nav { width: 100%; margin-bottom: 1rem; }
+      .dashboard__content { padding: 1rem; }
+      .controls { flex-direction: column; }
+      .controls__apply-btn { width: 100%; margin-left: 0; }
     }
   </style>
 </head>
@@ -231,45 +269,40 @@
   </div>
 
   <script>
-    // Build JS arrays from server data
-    const userLabels = [
-      <c:forEach var="m" items="${userReport.labels}" varStatus="st">
-        ${st.index>0?',' : ''}"${fn:escapeXml(m)}"
-      </c:forEach>
-    ] || ['No Data'];
-    const userData = [
-      <c:forEach var="v" items="${userReport.data}" varStatus="st">
-        ${st.index>0?',' : ''}${v}
-      </c:forEach>
-    ] || [0];
-
-    const modelLabels = [
-      <c:forEach var="m" items="${modelReport.labels}" varStatus="st">
-        ${st.index>0?',' : ''}"${fn:escapeXml(m)}"
-      </c:forEach>
-    ] || ['No Data'];
-    const modelData = [
-      <c:forEach var="v" items="${modelReport.data}" varStatus="st">
-        ${st.index>0?',' : ''}${v}
-      </c:forEach>
-    ] || [0];
+    // build label/data arrays…
+    const userLabels = [<c:forEach var="m" items="${userReport.labels}" varStatus="st">${st.index>0?',' : ''}"${fn:escapeXml(m)}"</c:forEach>] || ['No Data'];
+    const userData   = [<c:forEach var="v" items="${userReport.data}"   varStatus="st">${st.index>0?',' : ''}${v}</c:forEach>]   || [0];
+    const modelLabels= [<c:forEach var="m" items="${modelReport.labels}" varStatus="st">${st.index>0?',' : ''}"${fn:escapeXml(m)}"</c:forEach>]||['No Data'];
+    const modelData  = [<c:forEach var="v" items="${modelReport.data}"   varStatus="st">${st.index>0?',' : ''}${v}</c:forEach>]  || [0];
 
     new Chart(document.getElementById('userChart').getContext('2d'), {
       type: 'line',
       data: {
         labels: userLabels,
-        datasets: [{ label: 'New Users', data: userData, borderColor: '#111', fill: false, tension: .3 }]
+        datasets: [{
+          label: 'New Users',
+          data: userData,
+          borderColor: 'rgba(75,192,192,1)',
+          backgroundColor: 'rgba(75,192,192,0.2)',
+          fill: true, tension: .3
+        }]
       },
-      options: { responsive:true, scales:{ y:{ beginAtZero:true } } }
+      options: { responsive: true, scales: { y: { beginAtZero: true } } }
     });
 
     new Chart(document.getElementById('modelChart').getContext('2d'), {
       type: 'bar',
       data: {
         labels: modelLabels,
-        datasets: [{ label:'Units Sold', data:modelData, backgroundColor:'#111' }]
+        datasets: [{
+          label: 'Units Sold',
+          data: modelData,
+          backgroundColor: 'rgba(255,159,64,0.6)',
+          borderColor:     'rgba(255,159,64,1)',
+          borderWidth: 1
+        }]
       },
-      options: { responsive:true, scales:{ y:{ beginAtZero:true } } }
+      options: { responsive: true, scales: { y: { beginAtZero: true } } }
     });
   </script>
 </body>

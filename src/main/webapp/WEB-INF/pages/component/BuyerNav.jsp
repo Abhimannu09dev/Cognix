@@ -13,13 +13,14 @@
 
     /* === Sidebar Layout === */
     .sidebar {
-      width: 280px;
-      height: 100vh;
+      width: 240px;
+      height: 97vh;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       background: #F1EDE9;
-      padding: 2rem 1.5rem 1.5rem;
+      padding-top: 1rem;
+      padding-bottom: 1rem;
     }
     .sidebar__logo {
       text-align: center;
@@ -172,7 +173,7 @@
     <!-- Navigation -->
     <ul class="nav-list">
       <li class="nav-item ${param.currentPage=='dashboard'?'active':''}">
-        <a href="${pageContext.request.contextPath}/BUyerDashboard?currentPage=dashboard">
+        <a href="${pageContext.request.contextPath}/BuyerDashboard?currentPage=dashboard">
           <img class="icon" src="${pageContext.request.contextPath}/nav-icons/Home.svg" alt="Dashboard"/>
           <span>Dashboard</span>
         </a>
