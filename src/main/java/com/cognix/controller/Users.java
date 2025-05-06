@@ -1,41 +1,53 @@
+// src/main/java/com/cognix/controller/Users.java
 package com.cognix.controller;
+
+import com.cognix.DAO.AdminPanelDAO;
+import com.cognix.model.User;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import jakarta.servlet.http.*;
 
-/**
- * Servlet implementation class Users
- */
+import java.io.IOException;
+import java.util.List;
+
 @WebServlet("/Users")
 public class Users extends HttpServlet {
-	private static final long serialVersionUID = 1L;
-       
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
-    public Users() {
-        super();
-        // TODO Auto-generated constructor stub
+    private final AdminPanelDAO dao = new AdminPanelDAO();
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        // 1) Auth guard
+        HttpSession session = req.getSession(false);
+        if (session == null || session.getAttribute("user") == null) {
+            resp.sendRedirect(req.getContextPath() + "/Login");
+            return;
+        }
+
+        // 2) Pull all filters from query string
+        String q      = req.getParameter("q");
+        String role   = req.getParameter("role");
+        String status = req.getParameter("status");
+        String sort   = req.getParameter("sort");
+
+        try {
+            // 3) NOTE the correct order: search, role, status, sort
+            List<User> users = dao.findNewUsers(q, role, status, sort);
+            req.setAttribute("usersList", users);
+
+            // 4) Re‑expose so your JSP can re‑select them
+            req.setAttribute("q",      q);
+            req.setAttribute("role",   role);
+            req.setAttribute("status", status);
+            req.setAttribute("sort",   sort);
+
+            // 5) Forward to JSP
+            req.getRequestDispatcher("/WEB-INF/pages/Admin/Users.jsp")
+               .forward(req, resp);
+
+        } catch (Exception e) {
+            throw new ServletException("Error loading user management", e);
+        }
     }
-
-	/**
-	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
-	 */
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-    	request.getRequestDispatcher("/WEB-INF/pages/Admin/Users.jsp")
-        .forward(request, response);
-    }
-
-	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
-	 */
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		doGet(request, response);
-	}
-
 }
