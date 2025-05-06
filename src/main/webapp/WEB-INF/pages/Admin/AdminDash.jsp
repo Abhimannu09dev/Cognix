@@ -15,174 +15,249 @@
     crossorigin="anonymous"
     referrerpolicy="no-referrer"
   />
+    <!-- CSS -->
+    <style type="text/css">
+    	:root {
+  --bg-offwhite: #F1EDE9;
+  --bg-white:    #fff;
+  --radius-lg:   24px;
+  --radius-sm:   8px;
+  --shadow-md:   0 2px 8px rgba(0,0,0,0.05);
+  --shadow-sm:   0 1px 4px rgba(0,0,0,0.05);
+  --font:        'Helvetica Neue', sans-serif;
+  --text:        #222;
+  --muted:       #666;
+  --accent:      #111;
+}
 
-  <style>
-    /* === Reset & Base === */
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Helvetica Neue', sans-serif;
-      background: #F1EDE9;
-      color: #222;
-    }
+/* === Reset & Base === */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+html, body {
+  height: 100%;
+  background: var(--bg-offwhite);
+  color: var(--text);
+  font-family: var(--font);
+}
+a { text-decoration: none; color: inherit; }
 
-    /* === Dashboard Container === */
-    .dashboard {
-      display: flex;
-      max-width: 1440px;
-      margin: 0 auto;
-      min-height: 100vh;
-    }
+/* === Dashboard Layout === */
+.dashboard {
+  display: flex;
+  max-width: 1440px;
+  margin: 0 auto;
+  height: 100vh;
+  overflow: hidden;
+  padding-left: 0.1rem;
+}
+.dashboard__nav {
+  width: 240px;
+  padding: 1rem 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+.dashboard__main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.dashboard__main::-webkit-scrollbar { display: none; }
 
-    /* === Sidebar === */
-    .dashboard__nav {
-      width: 240px;
-    }
+/* === Header === */
+.dashboard__header {
+  padding: 2rem;
+  box-shadow: var(--shadow-md);
+  border-bottom-left-radius: var(--radius-lg);
+  border-bottom-right-radius: var(--radius-lg);
+}
+.dashboard__header h1 {
+  font-size: 2rem;
+  line-height: 1.2;
+  color: var(--accent);
+}
 
-    /* === Main === */
-    .dashboard__main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
-    .dashboard__header {
-      padding: 2rem 3rem 0;
-    }
-    .dashboard__header h1 {
-      font-size: 1.875rem;
-    }
-    .dashboard__content {
-      flex: 1;
-      padding: 1.5rem 3rem;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 2rem;
-    }
+/* === Content Container === */
+.dashboard__content {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
 
-    /* === Sections === */
-    .section {
-      background: #fff;
-      border: 1px solid #e0e0e0;
-      border-radius: 16px;
-      padding: 1.5rem;
-    }
-    .section__header {
-      display: flex;
-      align-items: center;
-      margin-bottom: 1rem;
-    }
-    .section__header h2 {
-      font-size: 1.25rem;
-      color: #222;
-    }
-    .section__header hr {
-      flex: 1;
-      margin-left: 1rem;
-      border: none;
-      border-bottom: 1px solid #e0e0e0;
-    }
+/* === Section Card === */
+.section {
+  background: var(--bg-white);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  box-shadow: var(--shadow-md);
+}
+.section__header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+.section__header h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+.section__header hr {
+  flex: 1;
+  margin-left: 1rem;
+  border: none;
+  border-bottom: 1px solid #e0e0e0;
+}
 
-    /* === Controls === */
-    .controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      margin-bottom: 1rem;
-      align-items: center;
-    }
-    .controls__search {
-      flex: 1 1 200px;
-      display: flex;
-      align-items: center;
-      border-bottom: 1px solid #ddd;
-      padding-bottom: .25rem;
-      color: #666;
-    }
-    .controls__search i { margin-right: .75rem; }
-    .controls__search input {
-      flex: 1; border: none; background: transparent;
-      font-size: 1rem; color: #333;
-    }
-    .controls__search input::placeholder { color: #aaa; }
-    .controls__search input:focus { outline: none; }
+/* === Controls (filters & search) === */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+.controls__search {
+  flex: 1 1 250px;
+  display: flex;
+  align-items: center;
+  background: var(--bg-white);
+  border: 1px solid #ddd;
+  border-radius: 9999px;
+  padding: 0.5rem 1rem;
+  box-shadow: var(--shadow-sm);
+}
+.controls__search i {
+  margin-right: 0.75rem;
+  color: var(--muted);
+}
+.controls__search input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 1rem;
+  outline: none;
+}
 
-    .controls__filter {
-      position: relative;
-    }
-    .controls__filter select {
-      appearance: none;
-      border: 1px solid #ddd;
-      background: #fafafa;
-      padding: .5rem 2.25rem .5rem .75rem;
-      font-size: .95rem;
-      color: #444;
-      border-radius: .5rem;
-      cursor: pointer;
-      min-width: max-content;
-    }
-    .controls__filter:hover { background: #f0f0f0; }
-    .controls__filter::after {
-      content: "\f078"; /* Font Awesome chevron-down */
-      font-family: "Font Awesome 6 Free";
-      font-weight: 900;
-      position: absolute; right: .75rem; top: 50%;
-      transform: translateY(-50%);
-      pointer-events: none; color: #666;
-    }
+.controls__filter {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  background: var(--bg-white);
+  border: 1px solid #ddd;
+  border-radius: 9999px;
+  padding: 0.5rem 1rem;
+  box-shadow: var(--shadow-sm);
+}
+.controls__filter select {
+  appearance: none;
+  border: none;
+  background: transparent;
+  font-size: 0.95rem;
+  color: #444;
+  cursor: pointer;
+}
+.controls__filter i {
+  position: absolute;
+  right: 1rem;
+  pointer-events: none;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
 
-    .controls__apply {
-      background: #333;
-      color: #fff;
-      border: none;
-      padding: .5rem 1.5rem;
-      border-radius: .5rem;
-      font-size: .95rem;
-      cursor: pointer;
-      transition: background .2s;
-      white-space: nowrap;
-      margin-left: auto;
-    }
-    .controls__apply:hover { background: #444; }
+.controls__apply {
+  margin-left: auto;
+  background: var(--accent);
+  color: var(--bg-white);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 1.25rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.controls__apply:hover {
+  background: #333;
+}
 
-    /* === Data Table === */
-    .table-wrapper {
-      overflow-x: auto;
-    }
-    .data-table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 600px;
-    }
-    .data-table th,
-    .data-table td {
-      padding: .75rem 1rem;
-      text-align: left;
-      border-bottom: 1px solid #f5f5f5;
-      font-size: .95rem;
-      white-space: nowrap;
-    }
-    .data-table th {
-      background: #f9f9f9;
-      color: #333;
-    }
-    .data-table tr:last-child td {
-      border-bottom: none;
-    }
-    .data-table tr:hover td {
-      background: #f9f9f9;
-    }
-    .view-btn {
-      display: inline-block;
-      background: #007bff;
-      color: #fff;
-      padding: .4rem .8rem;
-      border-radius: .5rem;
-      font-size: .85rem;
-      text-decoration: none;
-      transition: background .2s;
-    }
-    .view-btn:hover { background: #0056b3; }
-  </style>
+/* === Table === */
+.table-wrapper {
+  overflow-x: auto;
+}
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.data-table th,
+.data-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 0.95rem;
+}
+.data-table th {
+  background: #fafafa;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.data-table tr:last-child td {
+  border-bottom: none;
+}
+.data-table td.no-data {
+  text-align: center;
+  color: #777;
+  padding: 2rem 0;
+}
+
+/* === Buttons (block/unblock, view) === */
+.btn--block,
+.btn--unblock,
+.view-btn {
+  display: inline-block;
+  font-size: 0.95rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+.btn--block {
+  background: #e74c3c;
+  color: #fff;
+}
+.btn--block:hover {
+  background: #c0392b;
+}
+.btn--unblock {
+  background: #27ae60;
+  color: #fff;
+}
+.btn--unblock:hover {
+  background: #1e8449;
+}
+.view-btn {
+  background: var(--accent);
+  color: var(--bg-white);
+}
+.view-btn:hover {
+  background: #333;
+}
+
+/* === Responsive === */
+@media (max-width: 768px) {
+  .dashboard { flex-direction: column; }
+  .dashboard__nav { width: 100%; position: relative; height: auto; }
+  .dashboard__header { text-align: center; }
+  .dashboard__content { padding: 1rem; }
+  .controls { flex-direction: column; }
+  .controls__apply { margin-left: 0; width: 100%; }
+}
+    	
+    </style>
 </head>
 <body>
   <div class="dashboard">
@@ -197,7 +272,7 @@
         <h1>Hey, Good Morning, <br> <c:out value="${sessionScope.user.name}"/></h1>
       </header>
       <div class="dashboard__content">
-
+      
         <!-- New Users Section -->
         <section class="section">
           <div class="section__header">
@@ -205,30 +280,54 @@
             <hr/>
           </div>
           <form method="get" class="controls">
-            <div class="controls__search">
-              <i class="fas fa-search"></i>
-              <input
-                name="userSearch"
-                type="text"
-                placeholder="Search users…"
-                value="${fn:escapeXml(param.userSearch)}"/>
-            </div>
-            <div class="controls__filter">
-              <select name="roleFilter">
-                <option value="">Role</option>
-                <option value="seller" <c:if test="${param.roleFilter=='seller'}">selected</c:if>>Seller</option>
-                <option value="buyer"  <c:if test="${param.roleFilter=='buyer'}">selected</c:if>>Buyer</option>
-              </select>
-            </div>
-            <div class="controls__filter">
-              <select name="sortUsers">
-                <option value="">Sort By</option>
-                <option value="date-desc" <c:if test="${param.sortUsers=='date-desc'}">selected</c:if>>Joined: New→Old</option>
-                <option value="date-asc"  <c:if test="${param.sortUsers=='date-asc'}">selected</c:if>>Joined: Old→New</option>
-              </select>
-            </div>
-            <button type="submit" class="controls__apply">Apply</button>
-          </form>
+              <div class="controls__search">
+                <i class="fas fa-search"></i>
+                <input
+                    name="userSearch"
+                    type="text"
+                    placeholder="Search users…"
+                    value="${fn:escapeXml(param.userSearch)}"/>
+                </div>
+			  <!-- … other filters … -->
+			  <div class="controls__filter">
+			    <select name="statusFilter">
+			      <option value="">All Status</option>
+			      <option value="blocked"
+			        ${statusFilter == 'blocked' ? 'selected' : ''}>
+			        Blocked
+			      </option>
+			      <option value="unblocked"
+			        ${statusFilter == 'unblocked' ? 'selected' : ''}>
+			        Unblocked
+			      </option>
+			    </select>
+			  </div>
+			
+			  <div class="controls__filter">
+			    <select name="roleFilter">
+			      <option value="">Role</option>
+			      <option value="seller" 
+			        ${roleFilter == 'seller' ? 'selected' : ''}>Seller</option>
+			      <option value="buyer"  
+			        ${roleFilter == 'buyer'  ? 'selected' : ''}>Buyer</option>
+			    </select>
+			  </div>
+			  <div class="controls__filter">
+			    <select name="sortUsers">
+			      <option value="">Sort By</option>
+			      <option value="date-desc" 
+			        ${sortUsers == 'date-desc' ? 'selected' : ''}>
+			        Joined: New→Old
+			      </option>
+			      <option value="date-asc"  
+			        ${sortUsers == 'date-asc'  ? 'selected' : ''}>
+			        Joined: Old→New
+			      </option>
+			    </select>
+			  </div>
+			  <button type="submit" class="controls__apply">Apply</button>
+			</form>
+          
           <div class="table-wrapper">
             <table class="data-table">
               <thead>
@@ -238,29 +337,43 @@
                 </tr>
               </thead>
               <tbody>
-                <c:forEach var="user" items="${newUsersList}" varStatus="st" begin="0" end="4">
+                <c:forEach var="user" items="${newUsersList}" varStatus="st">
                   <tr>
                     <td>${st.index + 1}</td>
                     <td>${fn:escapeXml(user.username)}</td>
-                    <td>${fn:escapeXml(user.fullName)}</td>
+                    <td>${fn:escapeXml(user.name)}</td>
                     <td><fmt:formatDate value="${user.createdAt}" pattern="yyyy-MM-dd"/></td>
                     <td>${fn:escapeXml(user.role)}</td>
                     <td>${fn:escapeXml(user.email)}</td>
-                    <td><a href="user-details?id=${user.id}" class="view-btn">View</a></td>
+                    <td>
+	                    <form action="${pageContext.request.contextPath}/UserStatus" method="post" style="display:inline; ">
+						  <input type="hidden" name="id" value="${user.id}"/>
+						  <c:choose>
+						    <c:when test="${user.status != 'blocked'}">
+						      <input type="hidden" name="action" value="block"/>
+						      <button type="submit" class="btn--block">Block</button>
+						    </c:when>
+						    <c:otherwise>
+						      <input type="hidden" name="action" value="unblock"/>
+						      <button type="submit" class="btn--unblock">Unblock</button>
+						    </c:otherwise>
+						  </c:choose>
+						</form>
+                    </td>
                   </tr>
                 </c:forEach>
                 <c:if test="${empty newUsersList}">
-                  <tr>
-                    <td colspan="7" style="text-align:center;color:#777;">
-                      No users found.
-                    </td>
-                  </tr>
+                  <tr><td colspan="7" style="text-align:center;color:#777;">
+                    No users found.
+                  </td></tr>
                 </c:if>
               </tbody>
             </table>
           </div>
+          
         </section>
-
+        
+        
         <!-- Top Models Section -->
         <section class="section">
           <div class="section__header">
@@ -277,12 +390,16 @@
                 value="${fn:escapeXml(param.modelSearch)}"/>
             </div>
             <div class="controls__filter">
-              <select name="categoryFilter">
-                <option value="">Category</option>
-                <option value="computer-vision" <c:if test="${param.categoryFilter=='computer-vision'}">selected</c:if>>Computer Vision</option>
-                <option value="nlp"              <c:if test="${param.categoryFilter=='nlp'}">selected</c:if>>NLP</option>
-                <option value="reinforcement"    <c:if test="${param.categoryFilter=='reinforcement'}">selected</c:if>>Reinforcement Learning</option>
-              </select>
+	            <select name="categoryFilter">
+				  <option value="">Category</option>
+				  <c:forEach var="cat" items="${modelCategories}">
+				    <option value="${cat}"
+				      <c:if test="${param.categoryFilter == cat}">selected</c:if>>
+				      ${fn:escapeXml(cat)}
+				    </option>
+				  </c:forEach>
+				</select>
+            
             </div>
             <div class="controls__filter">
               <select name="sortModels">
@@ -300,11 +417,11 @@
               <thead>
                 <tr>
                   <th>SN</th><th>Model Name</th><th>Category</th>
-                  <th>Price (USD)</th><th>Seller</th><th>Listed Date</th><th>View</th>
+                  <th>Price (USD)</th><th>Seller</th><th>Listed Date</th>
                 </tr>
               </thead>
               <tbody>
-                <c:forEach var="model" items="${topModelsList}" varStatus="st" begin="0" end="4">
+                <c:forEach var="model" items="${topModelsList}" varStatus="st">
                   <tr>
                     <td>${st.index + 1}</td>
                     <td>${fn:escapeXml(model.name)}</td>
@@ -312,7 +429,6 @@
                     <td>$${model.price}</td>
                     <td>@${fn:escapeXml(model.sellerUsername)}</td>
                     <td><fmt:formatDate value="${model.listedDate}" pattern="yyyy-MM-dd"/></td>
-                    <td><a href="model-details?id=${model.id}" class="view-btn">View</a></td>
                   </tr>
                 </c:forEach>
                 <c:if test="${empty topModelsList}">
@@ -326,8 +442,8 @@
             </table>
           </div>
         </section>
-
       </div>
+      
     </div>
   </div>
 </body>
