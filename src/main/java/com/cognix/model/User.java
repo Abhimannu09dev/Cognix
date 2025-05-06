@@ -15,6 +15,7 @@ public class User {
   private Date   createdAt;
   private Date   lastLogin;
   private int    cartId;
+  private String status;
 
   public int getId()                    { return id; }
   public void setId(int id)             { this.id = id; }
@@ -51,4 +52,7 @@ public class User {
 
   public int getCartId()                { return cartId; }
   public void setCartId(int c)          { this.cartId = c; }
+  
+  public String getStatus() { return status; }
+  public void setStatus(String s) { this.status = s; }
 }

@@ -1,41 +1,76 @@
+// src/main/java/com/cognix/controller/AdminDash.java
 package com.cognix.controller;
+
+import com.cognix.DAO.AdminPanelDAO;
+import com.cognix.model.Model;
+import com.cognix.model.User;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import jakarta.servlet.http.*;
 
-/**
- * Servlet implementation class AdminDash
- */
+import java.io.IOException;
+import java.util.List;
+
 @WebServlet("/AdminDash")
 public class AdminDash extends HttpServlet {
-	private static final long serialVersionUID = 1L;
-       
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
-    public AdminDash() {
-        super();
-        // TODO Auto-generated constructor stub
+    private final AdminPanelDAO dao = new AdminPanelDAO();
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+
+        // 1) Auth check
+        HttpSession session = req.getSession(false);
+        if (session == null || session.getAttribute("user") == null) {
+            resp.sendRedirect(req.getContextPath() + "/Login");
+            return;
+        }
+
+        // 2) Read all filters (note: statusFilter, not status)
+        String userSearch     = req.getParameter("userSearch");
+        String roleFilter     = req.getParameter("roleFilter");
+        String statusFilter   = req.getParameter("statusFilter");  // ← fixed
+        String sortUsers      = req.getParameter("sortUsers");
+        String modelSearch    = req.getParameter("modelSearch");
+        String categoryFilter = req.getParameter("categoryFilter");
+        String sortModels     = req.getParameter("sortModels");
+
+        try {
+            // 3) Fetch “new users” with the correct 4‑arg order
+            List<User> newUsers = dao.findNewUsers(
+                userSearch,
+                roleFilter,
+                statusFilter,
+                sortUsers
+            );
+            req.setAttribute("newUsersList",  newUsers);
+            req.setAttribute("statusFilter",  statusFilter);  // so JSP can read it
+
+            // 4) Fetch top models (unchanged)
+            List<Model> topModels = dao.findTopModels(
+                modelSearch,
+                categoryFilter,
+                sortModels
+            );
+            req.setAttribute("topModelsList", topModels);
+
+            // 5) Category list for dropdown
+            List<String> modelCategories = dao.findAllCategories();
+            req.setAttribute("modelCategories", modelCategories);
+
+            // 6) Forward
+            req.getRequestDispatcher("/WEB-INF/pages/Admin/AdminDash.jsp")
+               .forward(req, resp);
+
+        } catch (Exception e) {
+            throw new ServletException("Error loading admin dashboard", e);
+        }
     }
 
-	/**
-	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
-	 */
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-    	request.getRequestDispatcher("/WEB-INF/pages/Admin/AdminDash.jsp")
-        .forward(request, response);
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        doGet(req, resp);
     }
-
-	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
-	 */
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		doGet(request, response);
-	}
-
 }
