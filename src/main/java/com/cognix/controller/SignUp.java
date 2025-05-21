@@ -12,6 +12,10 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
+/**
+ * @author - Utpala Khatri
+ */
+
 @WebServlet("/SignUp")
 public class SignUp extends HttpServlet {
     private static final long serialVersionUID = 1L;

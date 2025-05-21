@@ -8,7 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- * Servlet implementation class AboutUs
+ * @author - Utpala Khatri
  */
 @WebServlet("/AboutUs")
 public class AboutUs extends HttpServlet {

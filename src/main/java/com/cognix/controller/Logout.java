@@ -6,6 +6,10 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import java.io.IOException;
 
+/**
+ * @author - Utpala Khatri
+ */
+
 @WebServlet("/logout")   // ← lowercase here
 public class Logout extends HttpServlet {
     @Override
