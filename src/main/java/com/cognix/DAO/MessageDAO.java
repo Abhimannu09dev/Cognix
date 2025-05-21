@@ -2,7 +2,6 @@ package com.cognix.DAO;
 
 import com.cognix.config.DbConfig;
 import com.cognix.model.Message;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;

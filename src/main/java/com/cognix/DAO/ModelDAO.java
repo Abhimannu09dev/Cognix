@@ -2,9 +2,7 @@
 package com.cognix.DAO;
 
 import com.cognix.model.Model;
-
 import jakarta.servlet.http.Part;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;

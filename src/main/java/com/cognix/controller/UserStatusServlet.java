@@ -9,6 +9,11 @@ import jakarta.servlet.http.*;
 
 import java.io.IOException;
 
+
+/**
+ * @author - Krishna Singh
+ */
+
 @WebServlet("/UserStatus")
 public class UserStatusServlet extends HttpServlet {
     private final AdminPanelDAO dao = new AdminPanelDAO();
