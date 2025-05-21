@@ -1,130 +1,66 @@
-package com.cognix.DAO;
+package com.cognix.controller;
 
-import com.cognix.config.DbConfig;
+import com.cognix.DAO.CartDAO;
+import com.cognix.DAO.ModelDAO;
 import com.cognix.model.Model;
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
+import com.cognix.model.User;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.*;
+import java.io.IOException;
+import java.sql.SQLException;
 
 /**
  * @author - Abhimannu Singh Kunwar
  */
 
-public class CartDAO {
+@WebServlet("/addToCart")
+public class AddToCartServlet extends HttpServlet {
+    private final CartDAO cartDao   = new CartDAO();
+    private final ModelDAO modelDao = new ModelDAO();
 
-    public List<Model> findCartItems(int buyerUserId) throws SQLException {
-        String sql =
-          "SELECT m.ModelID AS modelId, m.Name AS name, m.Catagory AS category, " +
-          "       m.Price AS price, m.Image_Path AS imagePath, " +
-          "       u.Username AS sellerUsername " +
-          "  FROM CartItems c " +
-          "  JOIN Models    m ON c.ModelID = m.ModelID " +
-          "  JOIN User      u ON m.SellerUserID = u.User_ID " +
-          " WHERE c.BuyerUserID = ?";
-        List<Model> items = new ArrayList<>();
-        try (Connection conn = DbConfig.getDbConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, buyerUserId);
-            try (ResultSet rs = ps.executeQuery()) {
-                int sn = 1;
-                while (rs.next()) {
-                    Model m = new Model();
-                    m.setSn(sn++);
-                    m.setModelId(rs.getInt("modelId"));
-                    m.setName(rs.getString("name"));
-                    m.setCategory(rs.getString("category"));
-                    m.setPrice(rs.getDouble("price"));
-                    m.setImagePath(rs.getString("imagePath"));
-                    m.setSellerUsername(rs.getString("sellerUsername"));
-                    items.add(m);
-                }
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        // 1) Ensure user is logged in
+        HttpSession session = req.getSession(false);
+        User me = session != null ? (User) session.getAttribute("user") : null;
+        if (me == null) {
+            resp.sendRedirect(req.getContextPath() + "/Login");
+            return;
+        }
+
+        int buyerId = me.getId();
+        int modelId = Integer.parseInt(req.getParameter("modelId"));
+
+        try {
+            // 2) Fetch the real price from the DB
+            Model m = modelDao.findById(modelId);
+            if (m == null) {
+                throw new ServletException("Model not found: " + modelId);
             }
-        }
-        return items;
-    }
-    
-    
-    /**
-     * Attempts to add the given model to the buyer's cart.
-     * @return true if inserted, false if already in cart.
-     */
-    public boolean addToCart(int buyerUserId, int modelId, double price) throws SQLException {
-        String existsSql = 
-            "SELECT 1 FROM CartItems WHERE BuyerUserID = ? AND ModelID = ?";
-        try (Connection conn = DbConfig.getDbConnection();
-             PreparedStatement psEx = conn.prepareStatement(existsSql)) {
-            psEx.setInt(1, buyerUserId);
-            psEx.setInt(2, modelId);
-            try (ResultSet rs = psEx.executeQuery()) {
-                if (rs.next()) {
-                    return false;  // already in cart
-                }
+            double price = m.getPrice();
+            
+            
+         // 3) Add to cart
+            boolean added = cartDao.addToCart(buyerId, modelId, price);
+            
+         // 4) Also record the purchase for “My Purchased Models”
+         try {
+              modelDao.insertPurchase(buyerId, modelId, price);
+             } catch (SQLException e) {
+             throw new ServletException("Error recording purchase", e);
             }
-        }
 
-        String insertSql = 
-            "INSERT INTO CartItems (BuyerUserID, ModelID, Price) VALUES (?,?,?)";
-        try (Connection conn = DbConfig.getDbConnection();
-             PreparedStatement psIns = conn.prepareStatement(insertSql)) {
-            psIns.setInt(1, buyerUserId);
-            psIns.setInt(2, modelId);
-            psIns.setDouble(3, price);
-            psIns.executeUpdate();
-            return true;
-        }
-    }
-
-    public void removeFromCart(int buyerUserId, int modelId) throws SQLException {
-        String sql = "DELETE FROM CartItems WHERE BuyerUserID = ? AND ModelID = ?";
-        try (Connection conn = DbConfig.getDbConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, buyerUserId);
-            ps.setInt(2, modelId);
-            ps.executeUpdate();
-        }
-    }
-    
-    
- // In com.cognix.DAO.CartDAO:
-
-    public void checkout(int buyerUserId) throws SQLException {
-        String insertSql =
-          "INSERT INTO OrdersReceived " +
-          "  (SellerUserID, BuyerUserID, ModelID, OrderDate, Price) " +
-          "SELECT m.SellerUserID, c.BuyerUserID, c.ModelID, NOW(), m.Price " +
-          "  FROM CartItems c " +
-          "  JOIN Models m ON c.ModelID = m.ModelID " +
-          " WHERE c.BuyerUserID = ?";
-          
-        String deleteSql = "DELETE FROM CartItems WHERE BuyerUserID = ?";
-
-        try (Connection conn = DbConfig.getDbConnection()) {
-            conn.setAutoCommit(false);
-            try (PreparedStatement psIns = conn.prepareStatement(insertSql);
-                 PreparedStatement psDel = conn.prepareStatement(deleteSql)) {
-                psIns.setInt(1, buyerUserId);
-                psIns.executeUpdate();
-
-                psDel.setInt(1, buyerUserId);
-                psDel.executeUpdate();
-
-                conn.commit();
-            } catch (SQLException e) {
-                conn.rollback();
-                throw e;
-            } finally {
-                conn.setAutoCommit(true);
+            // 4) Redirect back to wherever they were, appending the flag
+            String redirect = req.getHeader("Referer");
+            if (redirect == null) {
+                redirect = req.getContextPath() + "/BuyerDashboard";
             }
-        }
-    }
+            resp.sendRedirect(redirect + (redirect.contains("?") ? "&" : "?") + "added=" + added);
 
-    
-    public void deleteByModelId(int modelId) throws SQLException {
-        String sql = "DELETE FROM CartItems WHERE ModelID = ?";
-        try (Connection conn = DbConfig.getDbConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, modelId);
-            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new ServletException("Failed to add to cart", e);
         }
     }
 }
