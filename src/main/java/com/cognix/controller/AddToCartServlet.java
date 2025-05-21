@@ -6,6 +6,10 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author - Abhimannu Singh Kunwar
+ */
+
 public class CartDAO {
 
     public List<Model> findCartItems(int buyerUserId) throws SQLException {

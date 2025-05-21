@@ -14,6 +14,10 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.util.List;
 
+/**
+ * @author - Abhimannu Singh Kunwar
+ */
+
 @WebServlet("/SellerModel")
 public class SellerModel extends HttpServlet {
     private final ReportDAO reportDao = new ReportDAO();
