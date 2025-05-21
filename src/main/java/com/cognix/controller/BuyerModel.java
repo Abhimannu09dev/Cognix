@@ -7,11 +7,15 @@ import com.cognix.model.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
-
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
+
+
+/**
+ * @author - Sadhana Gautam
+ */
 
 @WebServlet("/BuyerModel")
 public class BuyerModel extends HttpServlet {
