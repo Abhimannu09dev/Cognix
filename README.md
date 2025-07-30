@@ -49,7 +49,7 @@ This project was developed as part of a team. Below are the components and featu
 
 ---
 
-## 🔗 Project Link
+## Project Link
 This is a fork of the original team repository: [Original Repository](https://github.com/utpalogic/Cognix)
 
 ---
